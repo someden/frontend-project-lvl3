@@ -132,6 +132,19 @@ const renderPosts = (elements, state, i18next) => {
   postsBox.appendChild(card);
 };
 
+const renderModal = (elements, state) => {
+  const { modal } = elements;
+  const { posts, ui: { modalPostId } } = state;
+  const post = posts.find(({ id }) => id === modalPostId);
+  const titleEl = modal.querySelector('.modal-title');
+  const descriptionEl = modal.querySelector('.modal-body');
+  const linkEl = modal.querySelector('.full-article');
+
+  titleEl.textContent = post.title;
+  descriptionEl.textContent = post.description;
+  linkEl.href = post.link;
+};
+
 const render = (elements, state, i18next, path) => {
   console.log('path', path);
   switch (path) {
@@ -145,7 +158,11 @@ const render = (elements, state, i18next, path) => {
       renderFeeds(elements, state, i18next);
       break;
     case 'posts':
+    case 'ui.viewedPostsIds':
       renderPosts(elements, state, i18next);
+      break;
+    case 'ui.modalPostId':
+      renderModal(elements, state);
       break;
     default:
       break;

@@ -135,6 +135,18 @@ export default () => {
       });
     });
 
+    elements.postsBox.addEventListener('click', (event) => {
+      const { id } = event.target.dataset;
+      if (!id) {
+        return;
+      }
+
+      state.ui.modalPostId = id;
+      if (!state.ui.viewedPostsIds.includes(id)) {
+        state.ui.viewedPostsIds.push(id);
+      }
+    });
+
     updateRss(state);
   });
 };
