@@ -44,6 +44,28 @@ const loadRss = (state, url) => {
     });
 };
 
+const updateRss = (state) => {
+  const promises = state.feeds.map((feed) => axios.get(addProxy(feed.url))
+    .then((response) => {
+      const parsedData = parse(response.data.contents);
+      const existedPostsLinks = state.posts
+        .filter((post) => post.feedId === feed.id)
+        .map((post) => post.link);
+      const newPosts = parsedData.posts
+        .filter((post) => !existedPostsLinks.includes(post.link))
+        .map((post) => ({ ...post, id: uniqueId(), feedId: feed.id }));
+
+      state.posts.push(...newPosts);
+    })
+    .catch((error) => {
+      console.log(error);
+    }));
+
+  return Promise.all(promises).finally(() => {
+    setTimeout(() => updateRss(state), 5000);
+  });
+};
+
 export default () => {
   const i18nInstance = i18next.createInstance();
 
@@ -112,5 +134,7 @@ export default () => {
         state.formProcess = { status: 'invalid', error: error.message };
       });
     });
+
+    updateRss(state);
   });
 };
