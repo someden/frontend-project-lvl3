@@ -1,9 +1,48 @@
+import axios from 'axios';
 import i18next from 'i18next';
+import uniqueId from 'lodash/uniqueId.js';
 import onChange from 'on-change';
 import * as yup from 'yup';
 
 import resources from './locales/index.js';
+import parse from './parser.js';
 import render from './render.js';
+
+const addProxy = (url) => {
+  const urlWithProxy = new URL('https://allorigins.hexlet.app/get');
+  urlWithProxy.searchParams.set('url', url);
+  urlWithProxy.searchParams.set('disableCache', 'true');
+  return urlWithProxy.toString();
+};
+
+const getErrorCode = (error) => {
+  if (error.isParsingError) {
+    return 'noRss';
+  }
+  if (error.isAxiosError) {
+    return 'network';
+  }
+  return 'unknown';
+};
+
+const loadRss = (state, url) => {
+  state.loadingProcess = { status: 'loading', error: null };
+  return axios.get(addProxy(url))
+    .then((response) => {
+      const parsedData = parse(response.data.contents);
+      const feed = {
+        url, id: uniqueId(), title: parsedData.title, description: parsedData.descrpition,
+      };
+      const posts = parsedData.posts.map((post) => ({ ...post, feedId: feed.id, id: uniqueId() }));
+      state.posts.push(...posts);
+      state.feeds.push(feed);
+
+      state.loadingProcess = { status: 'success', error: null };
+    })
+    .catch((error) => {
+      state.loadingProcess = { status: 'failed', error: getErrorCode(error) };
+    });
+};
 
 export default () => {
   const i18nInstance = i18next.createInstance();
@@ -65,8 +104,10 @@ export default () => {
       const formData = new FormData(event.target);
       const url = formData.get('url').trim();
 
+      state.formProcess = { status: 'validation', error: null };
       validate(url, state.feeds).then(() => {
         state.formProcess = { status: 'filling', error: null };
+        loadRss(state, url);
       }).catch((error) => {
         state.formProcess = { status: 'invalid', error: error.message };
       });
