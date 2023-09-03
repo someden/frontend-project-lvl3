@@ -146,7 +146,6 @@ const renderModal = (elements, state) => {
 };
 
 const render = (elements, state, i18next, path) => {
-  console.log('path', path);
   switch (path) {
     case 'formProcess':
       renderForm(elements, state, i18next);

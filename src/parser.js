@@ -19,5 +19,5 @@ export default (data) => {
     return { title, link, description };
   });
 
-  return { feed: { title: feedTitle, descrpition: feedDescription }, posts };
+  return { title: feedTitle, descrpition: feedDescription, posts };
 };

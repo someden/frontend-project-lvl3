@@ -116,7 +116,6 @@ export default () => {
     const validate = (url, feeds) => {
       const feedUrls = feeds.map((feed) => feed.url);
       const schema = yup.string().url().required().notOneOf(feedUrls);
-      console.log(feedUrls);
       return schema.validate(url);
     };
 
